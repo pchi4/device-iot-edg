@@ -1,5 +1,3 @@
-// lib/pages/main_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:device_edg/screens/cameta_detect_page.dart';
@@ -19,17 +17,13 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Lista de Widgets (páginas) que o BottomNavigationBar irá alternar
     final List<Widget> children = [
-      CameraDetectPage(
-        cameras: widget.cameras,
-      ), // Índice 0: Monitoramento (AI/Câmera)
-      const HistoryPage(), // Índice 1: Histórico (Dados/GET)
+      CameraDetectPage(cameras: widget.cameras),
+      const HistoryPage(),
     ];
 
     return Scaffold(
       body: children[_currentIndex],
-      // Estilo do BottomNavigationBar (em harmonia com o tema escuro)
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -37,9 +31,9 @@ class _MainScreenState extends State<MainScreen> {
             _currentIndex = index;
           });
         },
-        selectedItemColor: Colors.teal, // Cor de destaque
+        selectedItemColor: Colors.teal,
         unselectedItemColor: Colors.grey,
-        backgroundColor: Theme.of(context).colorScheme.surface, // Fundo escuro
+        backgroundColor: Theme.of(context).colorScheme.surface,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.videocam_outlined),
