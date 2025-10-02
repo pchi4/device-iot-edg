@@ -1,5 +1,3 @@
-// lib/pages/history_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:device_edg/services/event_service.dart';
 
@@ -60,62 +58,59 @@ class _HistoryPageState extends State<HistoryPage> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.teal))
-          : _anomalies.isEmpty
-          ? const Center(
-              child: Text(
-                'Nenhuma anomalia salva no banco de dados.',
-                style: TextStyle(color: Colors.grey),
-              ),
-            )
-          : RefreshIndicator(
-              onRefresh: _fetchAnomalies, // Permite puxar para recarregar
-              color: Colors.teal,
-              child: ListView.builder(
-                itemCount: _anomalies.length,
-                itemBuilder: (context, index) {
-                  final anomaly = _anomalies[index];
+      body:
+          _isLoading
+              ? const Center(
+                child: CircularProgressIndicator(color: Colors.teal),
+              )
+              : _anomalies.isEmpty
+              ? const Center(
+                child: Text(
+                  'Nenhuma anomalia salva no banco de dados.',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              )
+              : RefreshIndicator(
+                onRefresh: _fetchAnomalies,
+                color: Colors.teal,
+                child: ListView.builder(
+                  itemCount: _anomalies.length,
+                  itemBuilder: (context, index) {
+                    final anomaly = _anomalies[index];
 
-                  // 🚨 CORREÇÃO PRINCIPAL: Verificação de Nulo
-                  // Garante que 'anomaly' não é nulo antes de tentar acessá-lo.
-                  if (anomaly == null) {
-                    return const SizedBox.shrink(); // Ou um widget de erro
-                  }
+                    if (anomaly == null) {
+                      return const SizedBox.shrink();
+                    }
 
-                  return Card(
-                    // ... (restante do Card)
-                    child: ListTile(
-                      leading: const Icon(
-                        Icons.warning_amber,
-                        color: Colors.redAccent,
-                        size: 30,
-                      ),
+                    return Card(
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.warning_amber,
+                          color: Colors.redAccent,
+                          size: 30,
+                        ),
+                        title: Text(
+                          anomaly['type']?.toUpperCase() ??
+                              'ANOMALIA DESCONHECIDA',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
 
-                      // Use ?? '' para garantir que, se a chave não existir ou for nula, uma string vazia seja usada.
-                      title: Text(
-                        anomaly['type']?.toUpperCase() ??
-                            'ANOMALIA DESCONHECIDA',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                        subtitle: Text(
+                          'Hora: ${_formatTimestamp(anomaly['timestamp'] ?? 'N/A')} | Lat/Lon: ${anomaly['latitude'] != null ? anomaly['latitude'].toStringAsFixed(3) : 'N/D'}, ${anomaly['longitude'] != null ? anomaly['longitude'].toStringAsFixed(3) : 'N/D'}',
+                          style: TextStyle(color: Colors.grey[400]),
+                        ),
+                        trailing: const Icon(
+                          Icons.chevron_right,
+                          color: Colors.grey,
                         ),
                       ),
-
-                      subtitle: Text(
-                        // Use ?? 'N/D' para as coordenadas e verifique se o valor é válido antes de formatar.
-                        'Hora: ${_formatTimestamp(anomaly['timestamp'] ?? 'N/A')} | Lat/Lon: ${anomaly['latitude'] != null ? anomaly['latitude'].toStringAsFixed(3) : 'N/D'}, ${anomaly['longitude'] != null ? anomaly['longitude'].toStringAsFixed(3) : 'N/D'}',
-                        style: TextStyle(color: Colors.grey[400]),
-                      ),
-                      trailing: const Icon(
-                        Icons.chevron_right,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
     );
   }
 }

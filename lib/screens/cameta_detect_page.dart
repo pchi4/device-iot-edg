@@ -1,7 +1,12 @@
-// lib/pages/camera_detect_page.dart
+import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
+import 'package:tflite_flutter/tflite_flutter.dart';
+import 'package:collection/collection.dart';
+
 import 'package:device_edg/services/event_service.dart';
 import 'package:device_edg/services/tflite_service.dart';
 
@@ -21,20 +26,59 @@ class _CameraDetectPageState extends State<CameraDetectPage> {
   bool _modelLoading = true;
   bool _isCameraInitialized = false;
   bool _sendingEvent = false;
+  Interpreter? _interpreter;
+  List<String> _labels = [];
 
   @override
   void initState() {
     super.initState();
     _initServices();
+    _loadModel();
   }
 
   Future<void> _initServices() async {
-    // Carrega o modelo TFLite na inicialização
     await _tfliteService.loadModel('assets/mobilenet_v1_1.0_224.tflite');
+
+    _interpreter = _tfliteService.interpreter; // garante que não seja null
+
+    // carregar labels também
+    final rawLabels = await DefaultAssetBundle.of(
+      context,
+    ).loadString('assets/labels.txt');
+    _labels = rawLabels.split('\n');
+
     if (mounted) {
       setState(() {
         _modelLoading = false;
       });
+    }
+  }
+
+  Future<void> _loadModel() async {
+    try {
+      final options = InterpreterOptions()..threads = 4;
+      if (Platform.isAndroid || Platform.isIOS) {
+        options.addDelegate(XNNPackDelegate());
+      }
+
+      _interpreter = await Interpreter.fromAsset(
+        'models/mobilenet_v1_1.0_224.tflite',
+        options: options,
+      );
+
+      // Carregar labels
+      final rawLabels = await DefaultAssetBundle.of(
+        context,
+      ).loadString('assets/labels.txt');
+      _labels = rawLabels.split('\n');
+
+      setState(() {
+        _modelLoading = true;
+      });
+
+      print("Modelo carregado com sucesso!");
+    } catch (e) {
+      print("Erro ao carregar modelo: $e");
     }
   }
 
@@ -82,55 +126,113 @@ class _CameraDetectPageState extends State<CameraDetectPage> {
     _controller!.startImageStream((CameraImage image) async {
       if (_sendingEvent) return;
 
-      // 1. **INFERÊNCIA DA IMAGEM**
-      // TODO: Usar _tfliteService.interpreter para processar a 'image'
+      // final bool detectedCritical = _stubDetect();
 
-      // 2. **SIMULAÇÃO/DETECÇÃO**
-      final bool detectedCritical = _stubDetect(); // Simulação
+      final bool detectedCritical = await _runModel(image);
 
       if (detectedCritical) {
         _sendingEvent = true;
-        setState(() {}); // Atualiza o status na tela
+        setState(() {});
 
         await _eventService.sendDetectionEvent('SUSPICIOUS_MOVEMENT');
 
         _sendingEvent = false;
-        setState(() {}); // Atualiza o status na tela
+        setState(() {});
       }
     });
   }
 
-  bool _stubDetect() {
-    final now = DateTime.now().millisecond;
-    return now % 1000 < 50;
+  Future<bool> _runModel(CameraImage image) async {
+    if (_interpreter == null) return false;
+
+    final input = _convertCameraImage(image);
+
+    var output = List.filled(1001, 0.0).reshape([1, 1001]);
+    _interpreter!.run(input, output);
+
+    // Pega índice da maior probabilidade
+    final scores = output[0];
+    final maxScore = scores.reduce((a, b) => a > b ? a : b);
+    final maxIndex = scores.indexOf(maxScore);
+
+    final detectedLabel =
+        maxIndex < _labels.length ? _labels[maxIndex] : 'desconhecido';
+
+    print("Detectado: $detectedLabel ($maxScore)");
+    return detectedLabel.toLowerCase().contains("person");
+  }
+
+  img.Image convertYUV420ToImage(CameraImage image) {
+    final int width = image.width;
+    final int height = image.height;
+    final planes = image.planes;
+
+    var imageRgb = img.Image(width: width, height: height);
+    return imageRgb;
+  }
+
+  List<List<List<List<double>>>> _convertCameraImage(CameraImage image) {
+    // final Uint8List bytes = image.planes[0].bytes;
+    final img.Image converted = convertYUV420ToImage(image);
+
+    // final img.Image converted = img.Image.fromBytes(
+    //   width: image.width,
+    //   height: image.height,
+    //   bytes: bytes.buffer,
+    //   numChannels: 3, // se vier BGRA ou RGBA
+    // );
+
+    print("Camera format: ${image.format.group}");
+
+    final resized = img.copyResize(converted, width: 224, height: 224);
+
+    var input = List.generate(
+      1,
+      (_) => List.generate(
+        224,
+        (_) => List.generate(224, (_) => List.filled(3, 0.0)),
+      ),
+    );
+
+    for (var y = 0; y < 224; y++) {
+      for (var x = 0; x < 224; x++) {
+        final pixel = resized.getPixel(x, y); // retorna Pixel
+
+        input[0][y][x][0] = pixel.r / 255.0;
+        input[0][y][x][1] = pixel.g / 255.0;
+        input[0][y][x][2] = pixel.b / 255.0;
+      }
+    }
+
+    return input;
   }
 
   void _showErrorDialog(String title, String message) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
+      builder:
+          (ctx) => AlertDialog(
+            title: Text(title),
+            content: Text(message),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   @override
   void dispose() {
     _controller?.dispose();
-    _tfliteService.close();
+    // _tfliteService.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // ESTADO 1: Tela de Carregamento/Ação Inicial
     if (!_isCameraInitialized || _controller == null) {
       final bool modelReady = _tfliteService.interpreter != null;
 
@@ -142,7 +244,6 @@ class _CameraDetectPageState extends State<CameraDetectPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Ícone Grande
                 Icon(
                   modelReady ? Icons.check_circle_outline : Icons.pending,
                   size: 60,
@@ -150,13 +251,12 @@ class _CameraDetectPageState extends State<CameraDetectPage> {
                 ),
                 const SizedBox(height: 20),
 
-                // Indicador de Status do Modelo
                 Text(
                   _modelLoading
                       ? "Carregando Módulo AI..."
                       : (modelReady
-                            ? "SISTEMA PRONTO"
-                            : "ERRO: Falha ao carregar Modelo"),
+                          ? "SISTEMA PRONTO"
+                          : "ERRO: Falha ao carregar Modelo"),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -166,14 +266,14 @@ class _CameraDetectPageState extends State<CameraDetectPage> {
                 ),
                 const SizedBox(height: 50),
 
-                // NOVO BOTÃO DE AÇÃO
                 SizedBox(
-                  width: double.infinity, // Ocupa a largura total
+                  width: double.infinity,
                   height: 60,
                   child: ElevatedButton.icon(
-                    onPressed: modelReady && widget.cameras.isNotEmpty
-                        ? _initializeCamera
-                        : null,
+                    onPressed:
+                        modelReady && widget.cameras.isNotEmpty
+                            ? _initializeCamera
+                            : null,
                     icon: const Icon(Icons.videocam, size: 28),
                     label: const Text(
                       'INICIAR MONITORAMENTO',
@@ -187,7 +287,6 @@ class _CameraDetectPageState extends State<CameraDetectPage> {
 
                 const SizedBox(height: 30),
 
-                // Feedback de Erro/Aviso (Câmera)
                 if (widget.cameras.isEmpty && !_modelLoading)
                   const Text(
                     "⚠️ AVISO: Nenhuma câmera detectada. Verifique as permissões.",
@@ -201,15 +300,13 @@ class _CameraDetectPageState extends State<CameraDetectPage> {
       );
     }
 
-    // ESTADO 2: Tela de Visualização da Câmera Ativa
     return Scaffold(
       appBar: AppBar(
         title: const Text('Monitoramento Ativo'),
-        // Botão de Parada mais visível
+
         actions: [
           TextButton.icon(
             onPressed: () async {
-              // Lógica para parar e resetar o estado
               await _controller?.stopImageStream();
               await _controller?.dispose();
               setState(() {
@@ -227,20 +324,19 @@ class _CameraDetectPageState extends State<CameraDetectPage> {
       ),
       body: Stack(
         children: [
-          // 1. VISUALIZAÇÃO DA CÂMERA (Fundo)
           Positioned.fill(child: CameraPreview(_controller!)),
 
-          // 2. STATUS DE DETECÇÃO (Sobreposição)
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
             child: Container(
               padding: const EdgeInsets.all(16.0),
-              // Cor de fundo muda conforme o status (verde para normal, laranja para envio)
-              color: _sendingEvent
-                  ? Colors.orange.withOpacity(0.9)
-                  : Colors.green.withOpacity(0.8),
+
+              color:
+                  _sendingEvent
+                      ? Colors.orange.withOpacity(0.9)
+                      : Colors.green.withOpacity(0.8),
               child: Row(
                 children: [
                   Icon(
