@@ -26,7 +26,7 @@ packages:
     source: hosted
     version: "2.13.0"
   background_fetch:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: background_fetch
       sha256: e767745c31f71660063985c982497995d0a71755d3f1b0c8e8c96988d64d3003
@@ -42,7 +42,7 @@ packages:
     source: hosted
     version: "2.1.2"
   camera:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: camera
       sha256: dfa8fc5a1adaeb95e7a54d86a5bd56f4bb0e035515354c8ac6d262e35cec2ec8
@@ -106,7 +106,7 @@ packages:
     source: hosted
     version: "1.19.1"
   connectivity_plus:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: connectivity_plus
       sha256: "224a77051d52a11fbad53dd57827594d3bd24f945af28bd70bab376d68d437f0"
@@ -209,7 +209,7 @@ packages:
     source: sdk
     version: "0.0.0"
   geolocator:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: geolocator
       sha256: "6cb9fb6e5928b58b9a84bdf85012d757fd07aab8215c5205337021c4999bad27"
@@ -257,7 +257,7 @@ packages:
     source: hosted
     version: "0.2.5"
   hive:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: hive
       sha256: "8dcf6db979d7933da8217edcec84e9df1bdb4e4edc7fc77dbd5aa74356d6d941"
@@ -265,7 +265,7 @@ packages:
     source: hosted
     version: "2.2.3"
   http:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: http
       sha256: "5895291c13fa8a3bd82e76d5627f69e0d85ca6a30dcac95c4ea19a5d555879c2"
@@ -281,7 +281,7 @@ packages:
     source: hosted
     version: "4.1.2"
   image:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: image
       sha256: "4e973fcf4caae1a4be2fa0a13157aa38a8f9cb049db6529aa00b4d71abc4d928"
@@ -369,7 +369,7 @@ packages:
     source: hosted
     version: "1.9.1"
   path_provider:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: path_provider
       sha256: "3087813781ab814e4157b172f1a11c46be20179fcc9bea043e0fba36bc0acaa2"
@@ -526,7 +526,7 @@ packages:
     source: hosted
     version: "0.7.6"
   tflite_flutter:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: tflite_flutter
       sha256: "48e6fde2ad97162bb66a16a142f4c4698add9e8cd397ce9d1cc7451b55537ac1"
