@@ -16,6 +16,11 @@ O sistema utiliza a câmera do dispositivo para capturar frames, processá-los p
 
 ---
 
+<img width="320" height="100%" alt="Simulator Screenshot - iPhone 15 - 2025-11-06 at 10 55 29" src="https://github.com/user-attachments/assets/d77606a2-d59c-4c92-a4ea-e3a84b5d95b5" />
+
+
+___
+
 ## 🧠 Tecnologias Utilizadas
 
 | Camada | Tecnologia |
@@ -69,6 +74,9 @@ Ele realiza **inferências em tempo real**, com suporte a **multi-threading** e 
 - Android Studio / VS Code
 - Dispositivo físico com câmera
 - Permissões de câmera concedidas
+
+
+
 
 ### 2️⃣ Clonar o repositório
 ```bash
