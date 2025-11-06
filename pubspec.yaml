@@ -40,6 +40,8 @@ dependencies:
   background_fetch: ^1.2.3
   connectivity_plus: ^5.0.2
   hive: ^2.2.3
+  flutter_local_notifications: ^17.0.0
+  battery_plus: ^2.0.0
 
 dev_dependencies:
   flutter_test:

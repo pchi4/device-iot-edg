@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
-// Import CORRETO
 import 'package:background_fetch/background_fetch.dart';
-
-// Certifique-se de que esses arquivos estão no caminho correto
 import 'package:device_edg/services/event_service.dart';
 import 'package:device_edg/screens/cameta_detect_page.dart';
 import 'package:device_edg/screens/main_screen.dart';
 import 'package:camera/camera.dart';
 
-// Não precisamos mais de uma variável global para as câmeras
-// List<CameraDescription> availableCamerasList = []; // REMOVIDO/TRANSFERIDO
-
-// Função Headless Task permanece inalterada
 Future<void> backgroundFetchHeadlessTask(HeadlessTask task) async {
   print('[BackgroundFetch] Headless event received.');
 
@@ -24,24 +17,19 @@ Future<void> backgroundFetchHeadlessTask(HeadlessTask task) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 1. CHAVE: REGISTRAR A HEADLESS TASK ANTES DE runApp()
   BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
 
-  List<CameraDescription> cameras =
-      []; // Variável local para armazenar as câmeras
+  List<CameraDescription> cameras = [];
 
   try {
-    // Tenta obter a lista de câmeras
     cameras = await availableCameras();
   } on CameraException catch (e) {
     print('Erro ao obter câmeras: $e');
   }
 
-  // 2. CHAMA O runApp() PASSANDO A LISTA DE CÂMERAS
   runApp(MyApp(cameras: cameras));
 }
 
-// MyApp agora é StatelessWidget para receber as câmeras e iniciar o Background Fetch
 class MyApp extends StatefulWidget {
   final List<CameraDescription> cameras;
 
@@ -58,13 +46,11 @@ class _MyAppState extends State<MyApp> {
     initBackgroundFetch();
   }
 
-  // late final List<CameraDescription> cameras; // REMOVIDO (Dados vêm do widget.cameras)
-
   Future<void> initBackgroundFetch() async {
     try {
       await BackgroundFetch.configure(
         BackgroundFetchConfig(
-          minimumFetchInterval: 15, // intervalo em minutos
+          minimumFetchInterval: 15,
           stopOnTerminate: false,
           enableHeadless: true,
           startOnBoot: true,
@@ -93,7 +79,6 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Edge Vision MVP',
-      // TEMA DEFINIDO AQUI (configuração global)
       theme: ThemeData(
         brightness: Brightness.dark,
         primaryColor: Colors.teal,
@@ -116,10 +101,7 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
       ),
-      // O 'home' AGORA APONTA PARA O NOSSO GERENCIADOR DE ABAS, USANDO AS CÂMERAS PASSADAS
-      home: MainScreen(
-        cameras: widget.cameras,
-      ), // Acessa a propriedade 'cameras' do State
+      home: MainScreen(cameras: widget.cameras),
     );
   }
 }

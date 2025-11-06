@@ -1,5 +1,3 @@
-// lib/services/event_service.dart
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
@@ -48,7 +46,6 @@ class EventService {
     final connectivity = await Connectivity().checkConnectivity();
 
     if (connectivity == ConnectivityResult.none) {
-      // sem internet → salva local
       await box.add(event);
       print('📦 Evento salvo localmente (offline)');
       return;
@@ -64,7 +61,6 @@ class EventService {
       if (resp.statusCode == 200 || resp.statusCode == 201) {
         print('✅ Evento enviado com sucesso');
       } else {
-        // erro → salva local
         await box.add(event);
         print('⚠️ Falha ao enviar evento. Salvo localmente.');
       }
@@ -117,6 +113,55 @@ class EventService {
     } catch (e) {
       print('❌ Erro de conexão ao buscar anomalias: $e');
       return [];
+    }
+  }
+
+  Future<void> sendFeedbackEvent({
+    required String userCorrection,
+    required String detectedLabel,
+    required double confidence,
+  }) async {
+    await _initHive();
+    final box = Hive.box(_boxName);
+    final pos = await _getGeolocation();
+
+    final feedbackPayload = {
+      'device_id': 'phone-001',
+      'timestamp': DateTime.now().toIso8601String(),
+      'type': 'user_feedback', // Tipo de evento específico para retreinamento
+      'detected_label': detectedLabel,
+      'user_correction': userCorrection,
+      'confidence': confidence,
+      'latitude': pos?.latitude,
+      'longitude': pos?.longitude,
+    };
+
+    final connectivity = await Connectivity().checkConnectivity();
+
+    if (connectivity == ConnectivityResult.none) {
+      await box.add(feedbackPayload);
+      print('📦 Feedback salvo localmente (offline)');
+      return;
+    }
+
+    try {
+      final resp = await http.post(
+        Uri.parse('$_apiUrl/api/events'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(feedbackPayload),
+      );
+
+      if (resp.statusCode == 200 || resp.statusCode == 201) {
+        print(
+          '✅ Feedback enviado com sucesso para o servidor de retreinamento.',
+        );
+      } else {
+        await box.add(feedbackPayload);
+        print('⚠️ Falha ao enviar feedback. Salvo localmente.');
+      }
+    } catch (e) {
+      await box.add(feedbackPayload);
+      print('❌ Erro HTTP, feedback salvo localmente: $e');
     }
   }
 }

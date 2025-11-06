@@ -46,6 +46,10 @@
     <key>UIApplicationSupportsIndirectInputEvents</key>
     <true/>
 
+
+    <key>NSMicrophoneUsageDescription</key>
+    <string>O aplicativo não usa o microfone, mas esta chave pode ser necessária dependendo das dependências de câmera do Flutter.</string>
+
     <key>NSCameraUsageDescription</key>
     <string>This app needs access to the camera for real-time object detection and analysis.</string>
 
