@@ -1,15 +1,18 @@
 class RiskEvent {
   final DateTime timestamp;
-  final String
-  detectionType; // Ex: 'Pessoa', 'Movimento Anômalo', 'Objeto Desconhecido'
-  final double confidence; // Confiança do modelo (0.0 a 1.0)
-  final double riskScore; // Pontuação de risco calculada (0.0 a 100.0)
+  final String detectionType;
+  final double confidence;
+  final double riskScore;
+  final double? latitude;
+  final double? longitude;
 
   RiskEvent({
     required this.timestamp,
     required this.detectionType,
     required this.confidence,
     required this.riskScore,
+    this.latitude,
+    this.longitude,
   });
 
   Map<String, dynamic> toJson() => {
@@ -24,5 +27,24 @@ class RiskEvent {
     detectionType: json['detectionType'],
     confidence: json['confidence'],
     riskScore: json['riskScore'],
+    latitude: json['latitude'],
+    longitude: json['longitude'],
   );
+  RiskEvent copyWith({
+    DateTime? timestamp,
+    String? detectionType,
+    double? confidence,
+    double? riskScore,
+    double? latitude,
+    double? longitude,
+  }) {
+    return RiskEvent(
+      timestamp: timestamp ?? this.timestamp,
+      detectionType: detectionType ?? this.detectionType,
+      confidence: confidence ?? this.confidence,
+      riskScore: riskScore ?? this.riskScore,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+    );
+  }
 }

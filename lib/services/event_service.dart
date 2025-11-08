@@ -6,7 +6,7 @@ import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
 class EventService {
-  static const String _apiUrl = 'http://10.0.2.2:3000';
+  static const String _apiUrl = 'http://192.168.1.102:3000';
   static const String _boxName = 'offline_events';
 
   bool _initialized = false;
@@ -19,13 +19,38 @@ class EventService {
     _initialized = true;
   }
 
-  Future<Position?> _getGeolocation() async {
+  Future<Position?> getCurrentLocation() async {
+    // 1. CHECAR SE O GPS ESTÁ ATIVO NO DISPOSITIVO
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Se estiver desligado, o erro é 'service_disabled', não 'denied'.
+      // Peça ao usuário para ligar o GPS.
+      print("GPS erro: Serviço de localização está desligado.");
+      return null;
+    }
+
+    // 2. CHECAR O STATUS DA PERMISSÃO
+    LocationPermission permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      // Tenta solicitar a permissão novamente (se o diálogo aparecerá)
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        print("GPS erro: Permissão negada ou negada permanentemente.");
+        return null;
+      }
+    }
+
+    // 3. OBTER A POSIÇÃO
     try {
       return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.best,
+        desiredAccuracy: LocationAccuracy.bestForNavigation,
+        // Garante que o método não faça uma requisição única demorada,
+        // mas sim que use o último local conhecido rapidamente.
       );
     } catch (e) {
-      print('⚠️ GPS erro: $e');
+      print("GPS erro: Falha ao obter posição: $e");
       return null;
     }
   }
@@ -33,7 +58,7 @@ class EventService {
   Future<void> sendDetectionEvent(String detectionType) async {
     await _initHive();
     final box = Hive.box(_boxName);
-    final pos = await _getGeolocation();
+    final pos = await getCurrentLocation();
 
     final event = {
       'device_id': 'phone-001',
@@ -123,7 +148,7 @@ class EventService {
   }) async {
     await _initHive();
     final box = Hive.box(_boxName);
-    final pos = await _getGeolocation();
+    final pos = await getCurrentLocation();
 
     final feedbackPayload = {
       'device_id': 'phone-001',

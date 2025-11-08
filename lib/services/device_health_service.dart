@@ -52,7 +52,6 @@ class DeviceHealthService {
       batteryLevel = await _battery.batteryLevel;
     } catch (e) {
       print("⚠️ Erro ao obter nível de bateria: $e");
-      // Mantém o valor anterior
     }
 
     final isLiteModel = TfliteService().activeTier == ModelTier.lite;

@@ -1,5 +1,5 @@
 # Uncomment this line to define a global platform for your project
-platform :ios, '13.0'
+platform :ios, '13.0' # Versão mínima definida para 13.0
 source 'https://github.com/CocoaPods/Specs.git'
 
 
@@ -44,8 +44,13 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
 
+    # 1. Corrige o Deployment Target para todos os Pods (Resolve o Warning 11.0)
     target.build_configurations.each do |config|
-      # 🔧 Força o linker a carregar libs estáticas (evita erro de undefined symbols)
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0' 
+    end
+
+    # 2. Força o linker a carregar libs estáticas (evita erro de undefined symbols)
+    target.build_configurations.each do |config|
       config.build_settings['OTHER_LDFLAGS'] ||= ['-all_load']
     end
   end

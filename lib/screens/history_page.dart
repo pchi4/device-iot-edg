@@ -58,59 +58,56 @@ class _HistoryPageState extends State<HistoryPage> {
           ),
         ],
       ),
-      body:
-          _isLoading
-              ? const Center(
-                child: CircularProgressIndicator(color: Colors.teal),
-              )
-              : _anomalies.isEmpty
-              ? const Center(
-                child: Text(
-                  'Nenhuma anomalia salva no banco de dados.',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              )
-              : RefreshIndicator(
-                onRefresh: _fetchAnomalies,
-                color: Colors.teal,
-                child: ListView.builder(
-                  itemCount: _anomalies.length,
-                  itemBuilder: (context, index) {
-                    final anomaly = _anomalies[index];
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator(color: Colors.teal))
+          : _anomalies.isEmpty
+          ? const Center(
+              child: Text(
+                'Nenhuma anomalia salva no banco de dados.',
+                style: TextStyle(color: Colors.grey),
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _fetchAnomalies,
+              color: Colors.teal,
+              child: ListView.builder(
+                itemCount: _anomalies.length,
+                itemBuilder: (context, index) {
+                  final anomaly = _anomalies[index];
 
-                    if (anomaly == null) {
-                      return const SizedBox.shrink();
-                    }
+                  if (anomaly == null) {
+                    return const SizedBox.shrink();
+                  }
 
-                    return Card(
-                      child: ListTile(
-                        leading: const Icon(
-                          Icons.warning_amber,
-                          color: Colors.redAccent,
-                          size: 30,
-                        ),
-                        title: Text(
-                          anomaly['type']?.toUpperCase() ??
-                              'ANOMALIA DESCONHECIDA',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-
-                        subtitle: Text(
-                          'Hora: ${_formatTimestamp(anomaly['timestamp'] ?? 'N/A')} | Lat/Lon: ${anomaly['latitude'] != null ? anomaly['latitude'].toStringAsFixed(3) : 'N/D'}, ${anomaly['longitude'] != null ? anomaly['longitude'].toStringAsFixed(3) : 'N/D'}',
-                          style: TextStyle(color: Colors.grey[400]),
-                        ),
-                        trailing: const Icon(
-                          Icons.chevron_right,
-                          color: Colors.grey,
+                  return Card(
+                    child: ListTile(
+                      leading: const Icon(
+                        Icons.warning_amber,
+                        color: Colors.redAccent,
+                        size: 30,
+                      ),
+                      title: Text(
+                        anomaly['type']?.toUpperCase() ??
+                            'ANOMALIA DESCONHECIDA',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
-                    );
-                  },
-                ),
+
+                      subtitle: Text(
+                        'Hora: ${_formatTimestamp(anomaly['timestamp'] ?? 'N/A')} | Lat/Lon: ${anomaly['latitude'] != null ? anomaly['latitude'].toStringAsFixed(3) : 'N/D'}, ${anomaly['longitude'] != null ? anomaly['longitude'].toStringAsFixed(3) : 'N/D'}',
+                        style: TextStyle(color: Colors.grey[400]),
+                      ),
+                      trailing: const Icon(
+                        Icons.chevron_right,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  );
+                },
               ),
+            ),
     );
   }
 }
