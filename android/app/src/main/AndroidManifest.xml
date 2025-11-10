@@ -1,4 +1,6 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.device_edg">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
@@ -10,10 +12,21 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
-        <service android:name="com.transistorsoft.flutter.backgroundfetch.HeadlessJobService" android:permission="android.permission.BIND_JOB_SERVICE" android:exported="true" />
-        <receiver android:name="com.transistorsoft.flutter.backgroundfetch.HeadlessBroadcastReceiver" android:exported="true" />
+        <!-- O Service e o Receiver do background_fetch Headless -->
+        <service 
+            android:name="com.transistorsoft.flutter.backgroundfetch.HeadlessJobService" 
+            android:permission="android.permission.BIND_JOB_SERVICE" 
+            android:exported="true" />
         
-        <receiver android:name="com.transistorsoft.tsbackgroundfetch.BootReceiver" android:exported="true">
+        <receiver 
+            android:name="com.transistorsoft.flutter.backgroundfetch.HeadlessBroadcastReceiver" 
+            android:exported="true" />
+        
+        <!-- O BootReceiver com a correção tools:replace para resolver o conflito -->
+        <receiver 
+            android:name="com.transistorsoft.tsbackgroundfetch.BootReceiver" 
+            android:exported="true" 
+            tools:replace="android:exported"> 
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
@@ -42,6 +55,8 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+    
+    <!-- O elemento <queries> deve estar dentro de <manifest> mas FORA de <application> -->
     <queries>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>

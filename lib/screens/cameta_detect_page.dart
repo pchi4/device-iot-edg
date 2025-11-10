@@ -626,7 +626,6 @@ class _CameraDetectPageState extends State<CameraDetectPage> {
             right: 0,
             child: Container(
               padding: const EdgeInsets.all(16.0),
-
               color: _sendingEvent
                   ? Colors.orange.withOpacity(0.9)
                   : Colors.green.withOpacity(0.8),
@@ -637,14 +636,18 @@ class _CameraDetectPageState extends State<CameraDetectPage> {
                     color: Colors.white,
                   ),
                   const SizedBox(width: 10),
-                  Text(
-                    _sendingEvent
-                        ? '!! EVENTO CRÍTICO DETECTADO E ENVIANDO !!'
-                        : 'Monitorando com Sucesso. Aguardando Detecções...',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+
+                  Expanded(
+                    child: Text(
+                      _sendingEvent
+                          ? '!! EVENTO CRÍTICO DETECTADO E ENVIANDO !!'
+                          : 'Monitorando com Sucesso. Aguardando Detecções...',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],

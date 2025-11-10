@@ -5,7 +5,7 @@
 import FlutterMacOS
 import Foundation
 
-import battery_plus_macos
+import battery_plus
 import connectivity_plus
 import flutter_local_notifications
 import geolocator_apple

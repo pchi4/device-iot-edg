@@ -24,11 +24,12 @@ class TfliteService {
   Future<void> _loadModel(String path, ModelTier tier) async {
     try {
       _interpreter?.close();
+      _interpreter = null;
 
       final options = InterpreterOptions()..threads = 4;
-      if (Platform.isAndroid || Platform.isIOS) {
-        options.addDelegate(XNNPackDelegate());
-      }
+      // if (Platform.isAndroid || Platform.isIOS) {
+      //   options.addDelegate(XNNPackDelegate());
+      // }
 
       _interpreter = await Interpreter.fromAsset(path, options: options);
       _activeTier = tier;
