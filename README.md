@@ -17,6 +17,7 @@ O sistema utiliza a câmera do dispositivo para capturar frames, processá-los p
 ---
 
 <img width="320" height="100%" alt="Simulator Screenshot - iPhone 15 - 2025-11-06 at 10 55 29" src="https://github.com/user-attachments/assets/d77606a2-d59c-4c92-a4ea-e3a84b5d95b5" />
+<img width="320" height="100%" alt="Screenshot_1763570880" src="https://github.com/user-attachments/assets/44d30e6c-d8a0-4b28-b78b-fa9a88a972cb" />
 
 
 ___
